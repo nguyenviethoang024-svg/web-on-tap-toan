@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ôn tập Toán</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://unpkg.com/mathlive"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">∑ Ôn tập Toán</a>
+    <nav id="nav"></nav>
+  </header>
+
+  <main id="app"><p class="muted center">Đang tải…</p></main>
+
+  <!-- Hộp nhập công thức (MathLive) -->
+  <dialog id="mathDialog">
+    <h3>Nhập công thức</h3>
+    <p class="muted small">Gõ trực tiếp hoặc dùng bàn phím ký hiệu hiện ra khi bấm vào ô.</p>
+    <math-field id="mf" style="display:block;font-size:1.4rem;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;"></math-field>
+    <div class="row end" style="margin-top:1rem">
+      <button class="btn" id="mathCancel" type="button">Hủy</button>
+      <button class="btn primary" id="mathInsert" type="button">Chèn vào bài</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    // Tài khoản giáo viên = đăng nhập bằng email (không phải ẩn danh)
+    function isTeacherAcct() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    function isOwner(code) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/classes/$(code)).data.teacherUid == request.auth.uid;
+    }
+
+    match /classes/{code} {
+      // Học sinh chỉ lấy được lớp khi đã biết mã; không liệt kê được lớp nào
+      allow get: if signedIn();
+      allow list: if isTeacherAcct() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isTeacherAcct() && request.resource.data.teacherUid == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.teacherUid == request.auth.uid;
+
+      match /assignments/{aid} {
+        allow read: if isOwner(code) || (signedIn() && resource.data.published == true);
+        allow write: if isOwner(code);
+      }
+
+      match /submissions/{sid} {
+        allow read: if isOwner(code) ||
+          (signedIn() && (resource == null || resource.data.uid == request.auth.uid));
+
+        // Học sinh tạo bài làm của chính mình (id kết thúc bằng uid), không tự viết nhận xét
+        allow create: if signedIn()
+          && request.resource.data.uid == request.auth.uid
+          && sid.matches('.*_' + request.auth.uid)
+          && !('comment' in request.resource.data);
+
+        // Học sinh sửa bài của mình nhưng không đổi nhận xét
+        allow update: if signedIn()
+          && resource.data.uid == request.auth.uid
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.get('comment', null) == resource.data.get('comment', null);
+
+        // Giáo viên chủ lớp ghi nhận xét / xóa
+        allow update, delete: if isOwner(code);
+      }
+    }
+  }
+}
